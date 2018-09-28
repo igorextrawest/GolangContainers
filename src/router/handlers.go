@@ -12,8 +12,8 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 )
 
 func getUsersHandler(ctx *gin.Context) {

@@ -26,18 +26,21 @@ func (c *consumer) Start() {
 }
 
 func (c *consumer) StartSubscriber() {
-	c.Nats.Subscribe(constants.MessageTopic, func(user *models.User) {
+	_, err := c.Nats.Subscribe(constants.MessageTopic, func(user *models.User) {
 		if user != nil {
 			c.SaveToRedis(fmt.Sprintf("%s %s", user.FirstName, user.LastName))
 			log.Printf("Received a user: %+v\n", user)
 		}
 	})
+	if err != nil {
+		log.Printf("Can't subscribe to %s", constants.MessageTopic)
+	}
+
 }
 
 func (c *consumer) SaveToRedis(fullName string) {
 	connection := c.Redis.Get()
 	defer connection.Close()
-
 
 	t := time.Now().Unix()
 	timeStr := strconv.FormatInt(t, 10)
@@ -45,7 +48,7 @@ func (c *consumer) SaveToRedis(fullName string) {
 		log.Printf("Can't add value to set of names: %s", err.Error())
 		return
 	} else {
-		log.Printf("Successfully added to the redis!")
+		log.Printf("%s successfully added to the redis", fullName)
 	}
 }
 
